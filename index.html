@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suraksha Safety Intel | Industrial Safety Command Dashboard</title>
+  <!-- Google Fonts for Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-dark">
+  <div class="app-container">
+    
+    <!-- TOP TELEMETRY BAR -->
+    <header class="top-bar">
+      <div class="brand">
+        <svg class="brand-logo" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M12 8v5M12 16h.01" stroke-linecap="round"/>
+        </svg>
+        <div class="brand-text">
+          <h1>SURAKSHA</h1>
+          <span class="sub-brand">SAFETY INTEL</span>
+        </div>
+      </div>
+      
+      <!-- Live SCADA Counters -->
+      <div class="telemetry-ticker">
+        <div class="telemetry-item" id="ticker-risk">
+          <span class="label">FUSED RISK INDEX</span>
+          <span class="value risk-low" id="val-risk-index">12%</span>
+          <div class="indicator pulse-green" id="ind-risk-index"></div>
+        </div>
+        <div class="telemetry-item">
+          <span class="label">ACTIVE PERMITS</span>
+          <span class="value" id="val-active-permits">4</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="label">WORKERS ON SITE</span>
+          <span class="value" id="val-workers-count">24</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="label">O2 CONC (AVG)</span>
+          <span class="value" id="val-scada-o2">20.9%</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="label">TOXIC GAS (H2S)</span>
+          <span class="value warning-text" id="val-scada-h2s">0.0 ppm</span>
+        </div>
+      </div>
+
+      <!-- Simulator Selector -->
+      <div class="simulator-control">
+        <label for="scenario-select">SCENARIO RUNTIME:</label>
+        <select id="scenario-select" class="scenario-dropdown">
+          <option value="routine">Routine Operations (Normal)</option>
+          <option value="simop">SIMOP Conflict (Abnormal Permit)</option>
+          <option value="critical">Critical Incident (Gas Leak / Evacuation)</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="sidebar">
+        <nav class="nav-menu">
+          <button class="nav-btn active" data-target="view-command">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="9" rx="1"/>
+              <rect x="14" y="3" width="7" height="5" rx="1"/>
+              <rect x="14" y="12" width="7" height="9" rx="1"/>
+              <rect x="3" y="16" width="7" height="5" rx="1"/>
+            </svg>
+            Command Center
+          </button>
+          
+          <button class="nav-btn" data-target="view-permits">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Digital Permit Intelligence
+          </button>
+          
+          <button class="nav-btn" data-target="view-rag">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <path d="M10 8H8v4h4v-2"/>
+            </svg>
+            Incident Pattern RAG
+          </button>
+          
+          <button class="nav-btn" data-target="view-emergency" id="nav-btn-emergency">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Emergency Orchestrator
+          </button>
+          
+          <button class="nav-btn" data-target="view-compliance">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Compliance & Audits
+          </button>
+
+          <button class="nav-btn" data-target="view-chat">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Safety Agent Chat
+          </button>
+          
+          <button class="nav-btn" data-target="view-deck">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Pitch Deck & Architecture
+          </button>
+        </nav>
+        
+        <div class="sidebar-footer">
+          <div class="active-incident-banner hidden" id="critical-alert-sidebar">
+            <span class="blink-red">● EVACUATION ACTIVE</span>
+          </div>
+          <div class="user-profile">
+            <div class="avatar">CSO</div>
+            <div class="profile-info">
+              <span class="name">Chief Safety Officer</span>
+              <span class="role">Plant Operations & Safety</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT VIEWPORT -->
+      <main class="content-viewport">
+        
+        <!-- VIEW 1: COMMAND CENTER (GEOSPATIAL & ALERTS) -->
+        <section id="view-command" class="view-panel active">
+          <div class="grid-2col">
+            <!-- Left: Plant Geospatial Map -->
+            <div class="card map-card">
+              <div class="card-header">
+                <h3>Geospatial Safety Heatmap - Reformer Unit 3</h3>
+                <div class="map-legend">
+                  <span class="legend-item"><span class="legend-dot green"></span>Normal</span>
+                  <span class="legend-item"><span class="legend-dot orange"></span>Permit Zone</span>
+                  <span class="legend-item"><span class="legend-dot red"></span>Hazard Spot</span>
+                  <span class="legend-item"><span class="legend-dot worker"></span>Worker (RFID)</span>
+                </div>
+              </div>
+              <div class="map-wrapper">
+                <!-- Plant SVG layout -->
+                <svg id="plant-layout" viewBox="0 0 800 500">
+                  <defs>
+                    <radialGradient id="hazard-glow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#ff4a4a" stop-opacity="0.6"/>
+                      <stop offset="100%" stop-color="#ff4a4a" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="permit-glow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4"/>
+                      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+                    </radialGradient>
+                  </defs>
+
+                  <!-- Layout background grid -->
+                  <g class="grid-lines" stroke="#222" stroke-width="0.5">
+                    <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400 M 0,450 L 800,450" />
+                    <path d="M 100,0 L 100,500 M 200,0 L 200,500 M 300,0 L 300,500 M 400,0 L 400,500 M 500,0 L 500,500 M 600,0 L 600,500 M 700,0 L 700,500" />
+                  </g>
+
+                  <!-- Plant Zones Boundaries -->
+                  <!-- Zone A: Reformer Furnace -->
+                  <rect id="zone-reformer" class="map-zone" x="50" y="80" width="220" height="180" rx="8" />
+                  <!-- Zone B: Gas Pipe Rack -->
+                  <rect id="zone-piperack" class="map-zone" x="320" y="80" width="380" height="80" rx="8" />
+                  <!-- Zone C: Compressor House -->
+                  <rect id="zone-compressor" class="map-zone" x="320" y="220" width="200" height="200" rx="8" />
+                  <!-- Zone D: Tank Storage & Chemical Overhaul -->
+                  <rect id="zone-storage" class="map-zone" x="580" y="220" width="160" height="200" rx="8" />
+                  <!-- Zone E: Control Room / Safe Assembly -->
+                  <rect id="zone-controlroom" class="map-zone safe-zone" x="50" y="320" width="200" height="100" rx="8" />
+
+                  <!-- Zone Labels -->
+                  <text class="zone-label" x="160" y="105" text-anchor="middle">Reformer Furnace (Z-01)</text>
+                  <text class="zone-label" x="510" y="105" text-anchor="middle">Gas Pipe Rack (Z-02)</text>
+                  <text class="zone-label" x="420" y="245" text-anchor="middle">Compressor Deck (Z-03)</text>
+                  <text class="zone-label" x="660" y="245" text-anchor="middle">Chemical Storage (Z-04)</text>
+                  <text class="zone-label" x="150" y="345" text-anchor="middle">Control Room / Assembly (Z-05)</text>
+
+                  <!-- Dynamic Glow Overlays (Gas Accumulation or Permit overlays rendered via app.js) -->
+                  <g id="map-glows"></g>
+
+                  <!-- Plant Hardware Elements (static visual layout) -->
+                  <g stroke="#444" fill="none" stroke-width="1.5">
+                    <!-- Pipes linking structures -->
+                    <path d="M 270,140 L 320,140 M 320,120 L 270,120 M 420,160 L 420,220 M 440,160 L 440,220 M 660,160 L 660,220" />
+                    <!-- Reformer Stack details -->
+                    <line x1="80" y1="80" x2="80" y2="40" stroke-width="6"/>
+                    <line x1="240" y1="80" x2="240" y2="40" stroke-width="6"/>
+                    <circle cx="160" cy="170" r="30" stroke="#555" stroke-width="2"/>
+                    <!-- Compressor details -->
+                    <rect x="360" y="280" width="40" height="30" rx="2" stroke="#555"/>
+                    <rect x="440" y="280" width="40" height="30" rx="2" stroke="#555"/>
+                    <circle cx="380" cy="295" r="10" stroke="#444"/>
+                    <circle cx="460" cy="295" r="10" stroke="#444"/>
+                  </g>
+                  
+                  <!-- Dynamic Evacuation Route Arrows (hidden by default) -->
+                  <g id="evacuation-routes" class="hidden">
+                    <!-- Route from Compressor to Control Room -->
+                    <path class="evac-path animate-evac" d="M 320,320 L 250,320" marker-end="url(#arrow)" />
+                    <!-- Route from Reformer to Assembly -->
+                    <path class="evac-path animate-evac" d="M 160,260 L 160,320" />
+                    <!-- Route from PipeRack to Control Room -->
+                    <path class="evac-path animate-evac" d="M 350,160 L 210,320" />
+                    <!-- Route from Storage to Control Room -->
+                    <path class="evac-path animate-evac" d="M 580,320 L 420,440 L 200,420" />
+                  </g>
+
+                  <!-- Dynamic markers: Workers, Sensors, and Permits loaded in app.js -->
+                  <g id="map-sensors"></g>
+                  <g id="map-workers"></g>
+                  <g id="map-permits"></g>
+                </svg>
+              </div>
+            </div>
+            
+            <!-- Right: Real-time Incident Feed & Safety Analytics -->
+            <div class="right-column-grid">
+              <!-- Compound Risk Alerts -->
+              <div class="card risk-alerts-card">
+                <div class="card-header">
+                  <h3>Compound Risk Alerts (AI Agent Engine)</h3>
+                  <span class="badge danger-bg blink-alert" id="alerts-count-badge">0 Alerts</span>
+                </div>
+                <div class="alert-feed-container" id="alert-feed">
+                  <!-- Dynamic alerts will go here -->
+                  <div class="empty-state">
+                    <p>No safety violations detected. Monitoring SCADA and PTW logs...</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- SCADA Live Channels (IoT Streams) -->
+              <div class="card telemetry-card">
+                <div class="card-header">
+                  <h3>SCADA IoT Telemetry Feeds</h3>
+                  <span class="badge success-bg">Active Streams</span>
+                </div>
+                <div class="telemetry-table-wrapper">
+                  <table class="telemetry-table">
+                    <thead>
+                      <tr>
+                        <th>Sensor ID</th>
+                        <th>Location</th>
+                        <th>Parameter</th>
+                        <th>Current Value</th>
+                        <th>Alert Threshold</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="telemetry-rows">
+                      <!-- Dynamic rows from app.js -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: DIGITAL PERMIT INTELLIGENCE -->
+        <section id="view-permits" class="view-panel">
+          <div class="grid-2col">
+            <!-- Left Panel: Permit Checklist / Registry -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Digital Permit-To-Work (PTW) Registry</h3>
+                <span class="badge" id="permits-count">4 Active Permits</span>
+              </div>
+              <div class="permits-table-wrapper">
+                <table class="permits-table">
+                  <thead>
+                    <tr>
+                      <th>Permit ID</th>
+                      <th>Work Type</th>
+                      <th>Location</th>
+                      <th>Authorized By</th>
+                      <th>Risk Level</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="permit-rows">
+                    <!-- Rendered in JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div style="margin-top: 15px;">
+                <blockquote>
+                  <strong>SIMOPs Guard Alert:</strong> Simultaneous Operations (e.g. issuing a Hot Work permit within proximity of an active Gas Line maintenance or confined space overhaul) are audited in real time against live SCADA telemetry.
+                </blockquote>
+              </div>
+            </div>
+
+            <!-- Right Panel: AI Permit Safety Analyzer (Simulation tool) -->
+            <div class="card">
+              <div class="card-header">
+                <h3>AI PTW Safety Analyzer (Pre-execution Audit)</h3>
+                <span class="badge cyan-bg">Permit Intelligence Agent</span>
+              </div>
+              <div class="card-body">
+                <p class="description">Draft or mock upload a Permit to analyze if it creates hazardous simultaneous operations (SIMOPs) or conflicts with current SCADA sensor readings.</p>
+                
+                <form id="permit-analyzer-form" class="safety-form">
+                  <div class="form-group">
+                    <label for="p-type">Work Type</label>
+                    <select id="p-type" required>
+                      <option value="Hot Work">Hot Work (Welding, Grinding)</option>
+                      <option value="Confined Space Entry">Confined Space Entry (Vessel Overhaul)</option>
+                      <option value="Height Work">Height Work (Scaffolding)</option>
+                      <option value="Cold Work">Cold Work (Electrical Lockout)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="p-location">Plant Zone Location</label>
+                    <select id="p-location" required>
+                      <option value="Z-01">Reformer Furnace (Z-01)</option>
+                      <option value="Z-02">Gas Pipe Rack (Z-02)</option>
+                      <option value="Z-03">Compressor Deck (Z-03)</option>
+                      <option value="Z-04">Chemical Storage (Z-04)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="p-workers">Assigned Personnel Count</label>
+                    <input type="number" id="p-workers" value="3" min="1" max="15">
+                  </div>
+                  <div class="form-group">
+                    <label for="p-precautions">Safety Precautions Signed Off</label>
+                    <div class="checkbox-group">
+                      <label><input type="checkbox" id="chk-gas" checked> Gas Testing Completed</label>
+                      <label><input type="checkbox" id="chk-fire"> Fire Watch Posted</label>
+                      <label><input type="checkbox" id="chk-loto" checked> LOTO (Lockout/Tagout) Verified</label>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn primary-btn btn-full">Submit for AI Safety Audit</button>
+                </form>
+
+                <!-- Audit Results Pane (dynamic) -->
+                <div id="permit-audit-results" class="permit-audit-pane hidden">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 3: INCIDENT PATTERN RAG -->
+        <section id="view-rag" class="view-panel">
+          <div class="card">
+            <div class="card-header">
+              <h3>RAG-Powered Incident Pattern Intelligence Agent</h3>
+              <span class="badge purple-bg">Regulatory & Historic Corpus</span>
+            </div>
+            <div class="card-body">
+              <p class="description">Cross-references plant operations against Oil Industry Safety Directorate (OISD) guidelines, DGMS directives, the Indian Factory Act 1948, and 50+ historical Indian industrial near-miss records. Type a search below to test the retrieval and compliance synthesis engine.</p>
+              
+              <div class="search-bar-container">
+                <input type="text" id="rag-search-input" placeholder="e.g. H2S safety requirements, hot work permit near gas pipeline, confined space ventilation..." class="search-input">
+                <button id="rag-search-btn" class="btn primary-btn search-btn">Query safety corpus</button>
+              </div>
+
+              <!-- Fast Suggestion Chips -->
+              <div class="suggestion-chips">
+                <span class="chip" onclick="quickQuery('Visakhapatnam Steel Plant 2025 Coke Oven explosion')">Vizag Steel 2025 Incident</span>
+                <span class="chip" onclick="quickQuery('OISD-105 Permit-to-Work standards')">OISD-105 PTW Rules</span>
+                <span class="chip" onclick="quickQuery('Confined space ventilation Factory Act')">Confined Space Ventilation</span>
+                <span class="chip" onclick="quickQuery('H2S gas sensor thresholds')">H2S Hazard Levels</span>
+                <span class="chip" onclick="quickQuery('Jaipur refinery oil tank leak case study')">Jaipur Oil Tank Fire</span>
+              </div>
+
+              <!-- RAG Loading / Output -->
+              <div class="rag-results-container">
+                <div class="rag-step-visualizer hidden" id="rag-steps">
+                  <div class="step-line"><span class="step-icon">🔍</span> Embedding query and searching Vector Store...</div>
+                  <div class="step-line"><span class="step-icon">📄</span> Found 3 documents matching query (OISD standards & historical incidents)...</div>
+                  <div class="step-line"><span class="step-icon">🤖</span> Generating LLM compliance checklist and response...</div>
+                </div>
+                
+                <div id="rag-output" class="rag-output-text">
+                  <div class="empty-state">
+                    <p>Enter a safety question or select a suggestion chip above to query the corporate safety RAG corpus.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 4: EMERGENCY ORCHESTRATOR -->
+        <section id="view-emergency" class="view-panel">
+          <div class="grid-2col">
+            <!-- Left: ERO Console controls -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Emergency Response Orchestrator (ERO) Console</h3>
+                <span class="badge danger-bg blink-alert">Autonomous Safeguard</span>
+              </div>
+              <div class="card-body text-center">
+                <div class="critical-warning-box">
+                  <h4 class="warning-title">⚠️ SYSTEM TRIP & EVACUATION OVERLAY</h4>
+                  <p>Triggering the orchestrator simulates a critical safety breach. The platform will automatically override controls to activate localized alarms, isolate valves, dispatch real-time emergency responder payloads, and construct compliance documentation.</p>
+                  <div class="incident-picker">
+                    <label for="evac-trigger-type">SIMULATE TRIPPED INCIDENT:</label>
+                    <select id="evac-trigger-type" class="scenario-dropdown">
+                      <option value="H2S Gas Leak at Reformer Furnace">H2S Gas Leak at Reformer Furnace (Z-01)</option>
+                      <option value="Hydrocarbon Fire at Pipe Rack">Hydrocarbon Leak & Fire at Pipe Rack (Z-02)</option>
+                    </select>
+                  </div>
+                  <button id="btn-trigger-emergency" class="btn danger-btn btn-large">ACTIVATE ORCHESTRATION SHIELD</button>
+                  <button id="btn-reset-emergency" class="btn success-btn hidden">RESET EMERGENCY STATE</button>
+                </div>
+
+                <!-- Orchestrator Step execution list -->
+                <div class="ero-timeline hidden" id="ero-steps-timeline">
+                  <h4>Live Incident Protocol Log (First 180s)</h4>
+                  <div class="timeline-steps">
+                    <div class="t-step" id="t-step-1">
+                      <span class="time">00:02s</span>
+                      <span class="desc">Acoustic horn activated on Reformer Floor. PA Broadcast looped: "Evacuate immediately to Zone 5."</span>
+                    </div>
+                    <div class="t-step" id="t-step-2">
+                      <span class="time">00:08s</span>
+                      <span class="desc">Isolating SCADA valves RSV-301 & RSV-302 to stop refinery hydrocarbon inlet feeds.</span>
+                    </div>
+                    <div class="t-step" id="t-step-3">
+                      <span class="time">00:15s</span>
+                      <span class="desc">Dynamic Evacuation Route highlighted on geospatial plant map dashboard.</span>
+                    </div>
+                    <div class="t-step" id="t-step-4">
+                      <span class="time">00:25s</span>
+                      <span class="desc">Dispatched automated emergency SMS payload to safety team and nearby fire dispatchers.</span>
+                    </div>
+                    <div class="t-step" id="t-step-5">
+                      <span class="time">00:45s</span>
+                      <span class="desc">SCADA Sensor snapshot logged and encrypted for accident forensic inspection (Factory Act Requirement).</span>
+                    </div>
+                    <div class="t-step" id="t-step-6">
+                      <span class="time">01:20s</span>
+                      <span class="desc">Drafted statutory Form 18 (Notice of Accident) for submission to the Director of Factories.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Dynamic SMS & SCADA Lockdown Logs & Regulatory PDF generation -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Incident Recovery Payloads & Report Generator</h3>
+                <span class="badge" id="recovery-badge">Monitoring</span>
+              </div>
+              <div class="card-body">
+                <!-- SCADA log downloader -->
+                <div class="utility-box">
+                  <h4>SCADA Logs Preservation</h4>
+                  <p>In accordance with statutory guidelines, SCADA stream records 10-minutes prior to trip are sealed.</p>
+                  <button class="btn secondary-btn" id="btn-download-scada" disabled>Download Preserved SCADA Logs (.json)</button>
+                </div>
+                
+                <!-- Notice of Accident form preview (Factory Act Form 18) -->
+                <div class="report-box">
+                  <div class="report-box-header">
+                    <h4>Factory Act 1948 - Notice of Accident (Form 18)</h4>
+                    <button class="btn primary-btn small-btn" id="btn-print-report" disabled>Print Report / Save PDF</button>
+                  </div>
+                  <div class="form18-container" id="form18-content">
+                    <div class="form18-watermark">PRE-POPULATED REPORT</div>
+                    <div class="form-header">
+                      <h5>FORM 18</h5>
+                      <p>(Prescribed under Rule 115 of Maharashtra Factory Rules / Indian Factory Act)</p>
+                      <strong>NOTICE OF ACCIDENT OR DANGEROUS OCCURRENCE</strong>
+                    </div>
+                    <div class="form-body">
+                      <div class="form-row">
+                        <span class="f-label">1. Name of occupier:</span>
+                        <span class="f-val">Suraksha Heavy Chemical Corp Ltd.</span>
+                      </div>
+                      <div class="form-row">
+                        <span class="f-label">2. Address of factory:</span>
+                        <span class="f-val">Plot 4B, Petrochemical Zone, Mahad, Maharashtra</span>
+                      </div>
+                      <div class="form-row">
+                        <span class="f-label">3. Nature of Industry:</span>
+                        <span class="f-val">Refining & Heavy Industrial Chemical Synthesis</span>
+                      </div>
+                      <div class="form-row">
+                        <span class="f-label">4. Date and time of accident:</span>
+                        <span class="f-val" id="report-datetime">--:--:--</span>
+                      </div>
+                      <div class="form-row">
+                        <span class="f-label">5. Nature of dangerous occurrence:</span>
+                        <span class="f-val" id="report-occurrence">No accident active. System monitoring.</span>
+                      </div>
+                      <div class="form-row">
+                        <span class="f-label">6. Workers exposed/evacuated:</span>
+                        <span class="f-val" id="report-workers">0/24 evacuated</span>
+                      </div>
+                      <div class="form-row">
+                        <span class="f-label">7. Steps taken immediately by Response Orchestrator:</span>
+                        <span class="f-val" id="report-remediation">N/A</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: COMPLIANCE & AUDITS -->
+        <section id="view-compliance" class="view-panel">
+          <div class="grid-2col">
+            <!-- Left Panel: Compliance Checklist -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Plant Safety Compliance Index</h3>
+                <span class="badge success-bg" id="compliance-index-badge">94% Compliant</span>
+              </div>
+              <div class="card-body">
+                <p class="description">Continuous regulatory monitor checking active operation practices against standard Indian factory acts and OISD codes.</p>
+                
+                <div class="compliance-items-list">
+                  <div class="compliance-item passed">
+                    <div class="comp-status-icon">✓</div>
+                    <div class="comp-details">
+                      <strong>OISD-105 Standard Compliance</strong>
+                      <p>Permit-to-Work forms digital verification engine is active. Validated signed isolation lists.</p>
+                    </div>
+                  </div>
+                  <div class="compliance-item passed" id="comp-ventilation">
+                    <div class="comp-status-icon" id="comp-vent-icon">✓</div>
+                    <div class="comp-details">
+                      <strong>Factory Act 1948 - Section 36 (Confined Spaces)</strong>
+                      <p id="comp-vent-desc">Vessel entry ventilation checklist validated prior to worker access tags approval.</p>
+                    </div>
+                  </div>
+                  <div class="compliance-item passed" id="comp-simop">
+                    <div class="comp-status-icon" id="comp-simop-icon">✓</div>
+                    <div class="comp-details">
+                      <strong>SIMOPs Safety Isolation (OISD-GDN-232)</strong>
+                      <p id="comp-simop-desc">No hot work operations occurring inside active flammable gas boundaries.</p>
+                    </div>
+                  </div>
+                  <div class="compliance-item passed">
+                    <div class="comp-status-icon">✓</div>
+                    <div class="comp-details">
+                      <strong>Factory Act 1948 - Section 37 (Explosive Gas/Dust)</strong>
+                      <p>Intrinsically safe Class 1 Division 1 SCADA transceivers calibrated. Spark hazard monitored.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Panel: Auto-Generated Corrective & Preventive Action (CAPA) Workflow -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Auto-Generated CAPA Workflows</h3>
+                <span class="badge" id="capa-count-badge">0 Open Tasks</span>
+              </div>
+              <div class="card-body">
+                <p class="description">When the safety agent detects a compliance gap, it automatically generates a CAPA task with priority classification, assigned engineers, and an action pathway.</p>
+                
+                <div class="capa-tasks-container" id="capa-tasks">
+                  <!-- Populate dynamically -->
+                  <div class="empty-state">
+                    <p>Plant compliance metrics are fully satisfied. No outstanding CAPA requirements.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 6: SAFETY AGENT CHAT -->
+        <section id="view-chat" class="view-panel">
+          <div class="card chat-card-wrapper">
+            <div class="card-header chat-header">
+              <div class="chat-agent-info">
+                <h3>Suraksha Multi-Agent Collaboration Space</h3>
+                <p>Four specialized safety agents cooperating in real time</p>
+              </div>
+              <div class="agent-roster">
+                <span class="agent-pill active" title="SCADA Telemetry Monitor"><span class="dot"></span>SCADA Agent</span>
+                <span class="agent-pill active" title="Permit Risk Auditor"><span class="dot"></span>PTW Agent</span>
+                <span class="agent-pill active" title="Indian Safety Law Expert"><span class="dot"></span>Compliance Agent</span>
+                <span class="agent-pill active" title="Emergency Protocol Manager"><span class="dot"></span>Response Agent</span>
+              </div>
+            </div>
+            
+            <div class="chat-container">
+              <!-- Sidebar chat history summary or agent reasoning -->
+              <div class="chat-agents-reasoning">
+                <h4>Agent Taskboard</h4>
+                <ul class="agent-tasks">
+                  <li>
+                    <span class="agent-tag scada">SCADA Agent</span>
+                    <span class="task">Ingesting IoT tags (O2, Temp, H2S). Updating geospatial risk map grids.</span>
+                  </li>
+                  <li>
+                    <span class="agent-tag ptw">PTW Agent</span>
+                    <span class="task">Cross-referencing active work permits with physical locations to inspect SIMOP conflicts.</span>
+                  </li>
+                  <li>
+                    <span class="agent-tag compliance">Compliance Agent</span>
+                    <span class="task">Validating operations against Factory Act Section 36 & OISD-105 guidelines.</span>
+                  </li>
+                  <li>
+                    <span class="agent-tag response">Response Agent</span>
+                    <span class="task">Monitoring trigger thresholds. Escape route computation and evacuation pre-dispatch alert.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Main chat screen -->
+              <div class="chat-screen">
+                <div class="chat-messages" id="chat-messages-box">
+                  <!-- Load messages dynamically -->
+                </div>
+                
+                <div class="chat-input-bar">
+                  <input type="text" id="chat-input" placeholder="Type message or ask safety agents (e.g. 'Audit current plant safety', 'Show SCADA feeds')..." />
+                  <button class="btn primary-btn" id="btn-chat-send">Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 7: PITCH DECK & ARCHITECTURE -->
+        <section id="view-deck" class="view-panel">
+          <div class="deck-container">
+            <!-- Tabs for Pitch Deck vs. Architecture -->
+            <div class="deck-tabs">
+              <button class="tab-toggle-btn active" data-deck-tab="deck-slides">Hackathon Presentation Deck</button>
+              <button class="tab-toggle-btn" data-deck-tab="deck-arch">System Architecture</button>
+            </div>
+
+            <!-- TAB 1: PRESENTATION SLIDES -->
+            <div id="deck-slides" class="deck-tab-content active">
+              <div class="slider-wrapper">
+                <!-- Slide View -->
+                <div class="slide-view">
+                  
+                  <!-- SLIDE 1: PITCH -->
+                  <div class="slide active" data-slide="1">
+                    <div class="slide-logo">SURAKSHA SAFETY INTEL</div>
+                    <h2>The Silent Crisis in Indian Heavy Industry</h2>
+                    <h4 class="slide-subtitle">Data Present, But Unacted Upon: Moving From Reactive Overhauls to Preemptive Action</h4>
+                    
+                    <div class="slide-grid">
+                      <div class="slide-card border-red">
+                        <h3 class="red-text">The Industry Problem</h3>
+                        <p>Over 6,500 workplace fatalities occur annually in Indian heavy industry (DGFASLI). A 2024 FICCI survey shows <strong>60%+ of facilities reliance on manual handoffs</strong> between isolated digital safety tools.</p>
+                      </div>
+                      <div class="slide-card border-yellow">
+                        <h3 class="yellow-text">Vizag Steel Plant Case Study (Jan 2025)</h3>
+                        <p>Eight workers died in a coke oven battery gas explosion. SCADA gas pressure sensors recorded warning signals, but <strong>no unified intelligence layer connected sensor telemetry to operational decisions</strong> in time.</p>
+                      </div>
+                    </div>
+                    
+                    <div class="slide-footer">Slide 1 of 5 | Problem Statement</div>
+                  </div>
+
+                  <!-- SLIDE 2: THE SOLUTION -->
+                  <div class="slide" data-slide="2">
+                    <div class="slide-logo">SURAKSHA SAFETY INTEL</div>
+                    <h2>Suraksha Safety Intelligence Layer</h2>
+                    <h4 class="slide-subtitle">A Multi-Agent System Fusing Silos into Actionable Saftey Canvas</h4>
+                    
+                    <div class="slide-grid">
+                      <div class="slide-card">
+                        <span class="icon-circle cyan-bg">1</span>
+                        <h3>Unified Ingestion</h3>
+                        <p>Aggregates real-time SCADA sensor streams, active work permits (PTW), worker RFID locations, and compliance acts.</p>
+                      </div>
+                      <div class="slide-card">
+                        <span class="icon-circle purple-bg">2</span>
+                        <h3>Compound Risk Engine</h3>
+                        <p>Flags high-risk SIMOPs and multi-sensor deviations before thresholds are crossed.</p>
+                      </div>
+                      <div class="slide-card">
+                        <span class="icon-circle red-bg">3</span>
+                        <h3>Autonomous ERO</h3>
+                        <p>Drives evacuation sirens, sends mobile notifications, seals SCADA forensic logs, and auto-drafts regulatory accident reports in under 30 seconds.</p>
+                      </div>
+                    </div>
+                    
+                    <div class="slide-footer">Slide 2 of 5 | Proposed Solution</div>
+                  </div>
+
+                  <!-- SLIDE 3: VALUE ADD vs BASELINES -->
+                  <div class="slide" data-slide="3">
+                    <div class="slide-logo">SURAKSHA SAFETY INTEL</div>
+                    <h2>Technical Excellence & Innovation</h2>
+                    <h4 class="slide-subtitle">Why Suraksha Succeeds Where Single-Sensor Baselines Fail</h4>
+                    
+                    <table class="comparison-table">
+                      <thead>
+                        <tr>
+                          <th>Evaluation Metric</th>
+                          <th>Single-Sensor Baseline</th>
+                          <th>Suraksha Safety Intel (Multi-Agent RAG)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Compound Risk Detection</strong></td>
+                          <td class="red-text">None. Alerts only when O2 drops below 19.5% or LEL exceeds 10%.</td>
+                          <td class="green-text">Active. Detects sparks permit active within 5m of slow leak gas buildup hours prior to thresholds.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Incident Reaction Time</strong></td>
+                          <td>10 - 20 Minutes (Manual alerts, chaotic coordination).</td>
+                          <td class="green-text">Immediate (&lt; 2 seconds). Siren loops, valve isolations, PA announcements.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Regulatory Compliance</strong></td>
+                          <td>Post-facto manual paper filing (subject to audit fines and delays).</td>
+                          <td class="green-text">Continuous. Form 18 pre-populated on trip, constant gap analysis checks.</td>
+                        </tr>
+                        <tr>
+                          <td><strong>False Negative Rate</strong></td>
+                          <td>High. Siloed sensors miss overlapping low-level hazards.</td>
+                          <td class="green-text">Minimized. Intelligent cross-correlation flags risk co-occurrence.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    
+                    <div class="slide-footer">Slide 3 of 5 | Innovation Analysis</div>
+                  </div>
+
+                  <!-- SLIDE 4: BUSINESS IMPACT -->
+                  <div class="slide" data-slide="4">
+                    <div class="slide-logo">SURAKSHA SAFETY INTEL</div>
+                    <h2>Business Impact & Scalability</h2>
+                    <h4 class="slide-subtitle">Unlocking Operational Continuity and Zero Harm Goals</h4>
+                    
+                    <div class="slide-columns-3">
+                      <div class="col-card">
+                        <h3>99.9% Plant Safety</h3>
+                        <p>Zero fatalities goal. Proactive compound risk management mitigates gas leaks and fire risk before they require complete emergency shutdowns.</p>
+                      </div>
+                      <div class="col-card">
+                        <h3>LOTO & Audit Security</h3>
+                        <p>Full regulatory reporting to OISD/Factory Director. Eliminates statutory litigation risks, audit fines, and operational insurance cost overheads.</p>
+                      </div>
+                      <div class="col-card">
+                        <h3>Scalable Architecture</h3>
+                        <p>Standard data interface for telemetry, permits, and CCTV analytics. Easily deploys across chemical, refining, and mining assets via modular API plugins.</p>
+                      </div>
+                    </div>
+                    
+                    <div class="slide-footer">Slide 4 of 5 | Business Value</div>
+                  </div>
+
+                  <!-- SLIDE 5: DEMO INSTRUCTIONS -->
+                  <div class="slide" data-slide="5">
+                    <div class="slide-logo">SURAKSHA SAFETY INTEL</div>
+                    <h2>Interactive Prototype Scenario Demonstration</h2>
+                    <h4 class="slide-subtitle">Guide to Navigating the Suraksha Prototype Interface</h4>
+                    
+                    <div class="scenarios-guide">
+                      <div class="scen-item">
+                        <h5>🟢 Routine Operations</h5>
+                        <p>Normal SCADA feeds. No alerts. Safety Score at 94% compliance. Explore the geospatial layout and worker badges.</p>
+                      </div>
+                      <div class="scen-item">
+                        <h5>🟡 SIMOP Conflict</h5>
+                        <p>PTW issued in close proximity to gas maintenance lines. Notice the pulsing warning alert and compliance scorecard penalty. Test the Permit Analyzer form.</p>
+                      </div>
+                      <div class="scen-item">
+                        <h5>🔴 Critical Evacuation</h5>
+                        <p>Simulate H2S toxic gas leak. Highlights emergency evacuation routes, triggers PA system, locks SCADA tags, and enables Form 18 accident report compilation.</p>
+                      </div>
+                    </div>
+                    
+                    <div class="slide-footer">Slide 5 of 5 | Demo Scenarios</div>
+                  </div>
+
+                </div>
+
+                <!-- Slide Navigation -->
+                <div class="slider-controls">
+                  <button class="btn secondary-btn" id="btn-prev-slide">Previous</button>
+                  <span id="slide-number">1 / 5</span>
+                  <button class="btn secondary-btn" id="btn-next-slide">Next</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: SYSTEM ARCHITECTURE -->
+            <div id="deck-arch" class="deck-tab-content">
+              <div class="card arch-card">
+                <div class="card-header">
+                  <h3>Suraksha System Architecture & Data Flow</h3>
+                  <span class="badge purple-bg">Agentic Pipeline Design</span>
+                </div>
+                <div class="arch-canvas-container">
+                  <svg id="arch-diagram" viewBox="0 0 800 450" width="100%" height="100%">
+                    <!-- Blocks representing architecture layers -->
+                    <!-- Data Sources -->
+                    <g transform="translate(40, 50)">
+                      <rect x="0" y="0" width="140" height="340" rx="6" fill="#161b22" stroke="#444" stroke-width="1.5"/>
+                      <text x="70" y="30" text-anchor="middle" fill="#888" font-size="12" font-weight="bold">DATA SOURCES</text>
+                      
+                      <!-- Sensor Node -->
+                      <g transform="translate(10, 50)">
+                        <rect x="0" y="0" width="120" height="50" rx="4" fill="#0d1117" stroke="#333"/>
+                        <text x="60" y="30" text-anchor="middle" fill="#06b6d4" font-size="11">IoT/SCADA Tags</text>
+                      </g>
+                      <!-- Permits Node -->
+                      <g transform="translate(10, 120)">
+                        <rect x="0" y="0" width="120" height="50" rx="4" fill="#0d1117" stroke="#333"/>
+                        <text x="60" y="30" text-anchor="middle" fill="#f59e0b" font-size="11">Permit Logs (PTW)</text>
+                      </g>
+                      <!-- CCTV Node -->
+                      <g transform="translate(10, 190)">
+                        <rect x="0" y="0" width="120" height="50" rx="4" fill="#0d1117" stroke="#333"/>
+                        <text x="60" y="30" text-anchor="middle" fill="#10b981" font-size="11">CCTV RFID Feeds</text>
+                      </g>
+                      <!-- Regulatory Corpus -->
+                      <g transform="translate(10, 260)">
+                        <rect x="0" y="0" width="120" height="50" rx="4" fill="#0d1117" stroke="#333"/>
+                        <text x="60" y="30" text-anchor="middle" fill="#8b5cf6" font-size="11">OISD/Factory Acts</text>
+                      </g>
+                    </g>
+
+                    <!-- Ingestion / Processing -->
+                    <g transform="translate(230, 120)">
+                      <rect x="0" y="0" width="160" height="200" rx="6" fill="#161b22" stroke="#06b6d4" stroke-width="2"/>
+                      <text x="80" y="30" text-anchor="middle" fill="#06b6d4" font-size="12" font-weight="bold">INGESTION & RAG</text>
+                      
+                      <!-- Semantic vector mapping -->
+                      <g transform="translate(10, 60)">
+                        <rect x="0" y="0" width="140" height="45" rx="4" fill="#0d1117" stroke="#222"/>
+                        <text x="70" y="27" text-anchor="middle" fill="#fff" font-size="11">Vector Indexing</text>
+                      </g>
+                      <!-- Pipeline fusion -->
+                      <g transform="translate(10, 125)">
+                        <rect x="0" y="0" width="140" height="45" rx="4" fill="#0d1117" stroke="#222"/>
+                        <text x="70" y="27" text-anchor="middle" fill="#fff" font-size="11">Sensor Fusion Engine</text>
+                      </g>
+                    </g>
+
+                    <!-- Multi-Agent Orchestrator -->
+                    <g transform="translate(440, 50)">
+                      <rect x="0" y="0" width="160" height="340" rx="6" fill="#161b22" stroke="#8b5cf6" stroke-width="2"/>
+                      <text x="80" y="30" text-anchor="middle" fill="#8b5cf6" font-size="12" font-weight="bold">SAFETY AGENTS LAYER</text>
+                      
+                      <!-- Agent 1 -->
+                      <g transform="translate(10, 50)">
+                        <rect x="0" y="0" width="140" height="45" rx="4" fill="#0d1117" stroke="#8b5cf6" stroke-opacity="0.3"/>
+                        <text x="70" y="27" text-anchor="middle" fill="#fff" font-size="11">SCADA Monitor Agent</text>
+                      </g>
+                      <!-- Agent 2 -->
+                      <g transform="translate(10, 115)">
+                        <rect x="0" y="0" width="140" height="45" rx="4" fill="#0d1117" stroke="#8b5cf6" stroke-opacity="0.3"/>
+                        <text x="70" y="27" text-anchor="middle" fill="#fff" font-size="11">PTW Risk Auditor</text>
+                      </g>
+                      <!-- Agent 3 -->
+                      <g transform="translate(10, 180)">
+                        <rect x="0" y="0" width="140" height="45" rx="4" fill="#0d1117" stroke="#8b5cf6" stroke-opacity="0.3"/>
+                        <text x="70" y="27" text-anchor="middle" fill="#fff" font-size="11">Compliance Officer Agent</text>
+                      </g>
+                      <!-- Agent 4 -->
+                      <g transform="translate(10, 245)">
+                        <rect x="0" y="0" width="140" height="45" rx="4" fill="#0d1117" stroke="#8b5cf6" stroke-opacity="0.3"/>
+                        <text x="70" y="27" text-anchor="middle" fill="#fff" font-size="11">Response Coordinator Agent</text>
+                      </g>
+                      <!-- Shared reasoning -->
+                      <text x="80" y="325" text-anchor="middle" fill="#8b5cf6" font-size="10" font-style="italic">Orchestrated Chat Bus</text>
+                    </g>
+
+                    <!-- Outputs -->
+                    <g transform="translate(650, 120)">
+                      <rect x="0" y="0" width="120" height="200" rx="6" fill="#161b22" stroke="#444" stroke-width="1.5"/>
+                      <text x="60" y="30" text-anchor="middle" fill="#888" font-size="12" font-weight="bold">ACTIONS / UI</text>
+                      
+                      <!-- Map -->
+                      <g transform="translate(10, 50)">
+                        <rect x="0" y="0" width="100" height="40" rx="4" fill="#0d1117" stroke="#333"/>
+                        <text x="50" y="24" text-anchor="middle" fill="#fff" font-size="10">Safety Heatmap</text>
+                      </g>
+                      <!-- Controls -->
+                      <g transform="translate(10, 100)">
+                        <rect x="0" y="0" width="100" height="40" rx="4" fill="#0d1117" stroke="#333"/>
+                        <text x="50" y="24" text-anchor="middle" fill="#fff" font-size="10">Emergency Siren</text>
+                      </g>
+                      <!-- Docs -->
+                      <g transform="translate(10, 150)">
+                        <rect x="0" y="0" width="100" height="40" rx="4" fill="#0d1117" stroke="#333"/>
+                        <text x="50" y="24" text-anchor="middle" fill="#fff" font-size="10">Notice Form 18</text>
+                      </g>
+                    </g>
+
+                    <!-- Flow Arrows -->
+                    <g stroke="#666" stroke-width="1.5" fill="none">
+                      <!-- Data to Ingestion -->
+                      <path d="M 180,105 L 205,105 L 205,190 L 230,190" />
+                      <path d="M 180,175 L 230,175" />
+                      <path d="M 180,245 L 230,245" />
+                      <path d="M 180,315 L 205,315 L 205,280 L 230,280" />
+                      
+                      <!-- Ingestion to Agents -->
+                      <path d="M 390,220 L 440,220" />
+                      
+                      <!-- Agents to outputs -->
+                      <path d="M 600,150 L 625,150 L 625,190 L 650,190" />
+                      <path d="M 600,220 L 650,220" />
+                      <path d="M 600,290 L 625,290 L 625,270 L 650,270" />
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Custom Alert Overlay (PA alarm simulator) -->
+  <div id="alarm-overlay" class="alarm-overlay hidden">
+    <div class="alarm-banner">
+      <span class="siren-light">⚡</span>
+      <h2>EMERGENCY COMPLIANCE TRIP ACTIVE</h2>
+      <p id="alarm-banner-desc">H2S gas accumulation detected above 20 ppm in Zone 01 (Reformer Furnace). Automated isolation active.</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
